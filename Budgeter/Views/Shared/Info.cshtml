@@ -1,0 +1,21 @@
+﻿@if (User.Identity.IsAuthenticated)
+{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+else
+{
+    Layout = "~/Views/Shared/_AnonLayout.cshtml";
+}
+@{
+    ViewBag.Title = "Info";
+}
+<div class="row anon">
+    <div class="col-md-3 full-content-large">
+        <div class="login-wrap">
+            <h2>@ViewBag.Title</h2>
+            <h6>@ViewBag.Message</h6>
+
+            <a href="@Url.Action("Login", "Account")" class="btn btn-round btn-dark">Back to Welcome Page</a>
+        </div>
+    </div>
+</div>

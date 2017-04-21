@@ -1,0 +1,31 @@
+﻿@model Budgeter.Models.CodeFirst.InvitedUser
+
+<div class="removeIUser">
+    @using (Html.BeginForm("Create", "InvitedUsers"))
+    {
+        @Html.AntiForgeryToken()
+        <p>An invite code will be emailed to the prospective user, which will be valid for seven days.</p>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter New User's Name" } })
+            @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control", @placeholder = "Enter New User's Email Address" } })
+            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+        </div>
+        <div class="form-group">
+            <label>Give Administrator rights?</label>
+            @Html.CheckBox("HasAdminRights", new { htmlAttributes = new { @class = "form-control", id = "adminCk" } })
+            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group pull-right btn-float-strong">
+            <input type="submit" value="Create" class="btn btn-teal" />
+            <button type="button" class="cancel-invite btn btn-teal">Cancel</button>
+        </div>
+        <div class="clearfix"></div>
+        <hr />
+    }
+</div>

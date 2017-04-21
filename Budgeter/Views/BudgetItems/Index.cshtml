@@ -1,0 +1,76 @@
+﻿@model Budgeter.Models.CodeFirst.Household
+@using Microsoft.AspNet.Identity;
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-9">
+        <div class="box-info shadow">
+            <h2><strong>All</strong> Budget Items</h2>
+            <table id="tableBudg" class="data-table compact table-striped hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Balance</th>
+                        <th>Goal</th>
+                        <th>Category</th>
+                        <th>Warn Within</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.BudgetItems.Where(b => b.IsSoftDeleted != true))
+                    {
+                        var userId = User.Identity.GetUserId();
+                        <tr>
+                            <td>@item.Name</td>
+                            @if (item.Income == true)
+                            {
+                            <td><i class="fa fa-plus"></i></td>}
+                            else
+                            {
+                            <td><i class="fa fa-minus"></i></td>}
+                            <td>@item.Balance</td>
+                            <td>@item.AmountLimit</td>
+                            <td>@item.Category.Name</td>
+                            @if (item.WarningId != 28)
+                            {
+                            <td>$@item.Warning.WarningLevel</td>}
+                            else
+                            {
+                            <td><small>no warning</small></td> }
+                            <td>
+                                <button class="viewBudgTrans btn btn-sm btn-teal" data-id="@item.Id" type="button"><i class="fa fa-eye"></i></button>
+                                @if (item.AllowEdits == true || (item.AllowEdits != true && userId == item.CreatorId))
+                                {
+                                    <button class="editBudg btn btn-sm btn-teal" data-id="@item.Id" type="button"><i class="fa fa-edit"></i></button>
+                                    <button class="deleteBudg btn btn-sm btn-danger" data-id="@item.Id" type="button"><i class="fa fa-trash"></i></button>}
+
+                            </td>
+
+                            @*}*@
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div id="editView" class="box-info shadow">
+            @Html.Action("_Create", "BudgetItems")
+        </div>
+    </div>
+
+</div>
+<div class="row">
+    <div id="viewTrans">
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval");
+}

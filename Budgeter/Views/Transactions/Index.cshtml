@@ -1,0 +1,121 @@
+﻿@model IEnumerable<Budgeter.Models.CodeFirst.BankAccount>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <a href=@Url.Action("Create", "Transactions") type="button" class="btn btn-pad btn-teal">Create New Transaction</a>
+    </div>
+    <div id="editView" class="col-md-8">
+
+    </div>
+</div>
+<div id="accountsRender" role="tablist">
+    @foreach (var account in Model)
+    {
+        <div class="box-info shadow">
+            <h2><a role="button" data-toggle="collapse" data-parent="#accountsRender" data-target="#collapse-@account.Id" aria-expanded="false"><i class="btn btn-teal fa fa-angle-double-down fa-inverse"></i></a><strong>@account.Name</strong> <i class="fa fa-angle-right"></i> Balance: <span class="balance text-succ">$ @account.Balance</span> </h2>
+            <div id="collapse-@account.Id" class="collapse" role="tabpanel">
+                <table id="tableTrans" class="data-table compact hover table-striped">
+                    <thead>
+                        <tr>
+                            <th>Transaction Date</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                            <th>Category</th>
+                            <th>Budget</th>
+                            <th>Description</th>
+                            <th>Reconciled?</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var trans in account.Transactions.OrderBy(t => t.Transacted))
+                        {
+                            <tr>
+                                <td>@trans.Transacted.DateTime.ToShortDateString()</td>
+                                <td>@trans.Amount</td>
+                                <td>
+                                    @if (trans.Income == true)
+                                    { <i class="fa fa-plus"></i> }
+                                    else
+                                    { <i class="fa fa-minus"></i>}
+                                </td>
+                                <td>@trans.Category.Name</td>
+                                @if (trans.BudgetItem != null)
+                    {
+                                    <td>@trans.BudgetItem.Name</td>}
+                                else
+                                {
+                                    <td></td>}
+                                <td>@trans.Description</td>
+                                <td>
+                                    @if (trans.Reconciled == true)
+                    { <i class="fa fa-check"></i>  }
+                                </td>
+                                <td>
+                                    @if (trans.BudgetItemId != null)
+                                    {
+                                        <button type="button" class="transDetailsB btn btn-primary btn-xs" data-toggle="modal" data-target="#detailsModal" data-id="@trans.Id" data-account="@trans.BankAccount.Name" data-budget="@trans.BudgetItem.Name" data-category="@trans.Category.Name" data-user="@trans.User.FirstName" data-transacted="@trans.Transacted.DateTime.ToShortDateString()" data-entered="@trans.Entered.DateTime.ToShortDateString()" data-amount="$ @trans.Amount" data-desc="@trans.Description" data-income="@trans.Income" data-recon="@trans.Reconciled"><i class="fa fa-eye"></i></button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="transDetails btn btn-primary btn-xs" data-toggle="modal" data-target="#detailsModal" data-id="@trans.Id" data-account="@trans.BankAccount.Name" data-category="@trans.Category.Name" data-user="@trans.User.FirstName" data-transacted="@trans.Transacted.DateTime.ToShortDateString()" data-entered="@trans.Entered.DateTime.ToShortDateString()" data-amount="$ @trans.Amount" data-desc="@trans.Description" data-income="@trans.Income" data-recon="@trans.Reconciled"><i class="fa fa-eye"></i></button>
+                                    }
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <button type="button" class="editTrans btn btn-primary btn-xs" data-id="@trans.Id"><i class="fa fa-edit"></i></button>
+                                        <button type="button" class="deleteTrans btn btn-danger btn-xs" data-id="@trans.Id"><i class="fa fa-trash-o"></i></button>
+                                    }
+
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- TRANS DETAILS MODAL -->
+<div id="detailsModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"><strong>Transaction</strong> Details</h4>
+            </div>
+            <div class="modal-body">
+                <dl class="dl-horizontal">
+                    <dt>Account</dt>
+                    <dd id="transAccount"></dd>
+                    <dt>Budget</dt>
+                    <dd id="transBudget"></dd>
+                    <dt>Category</dt>
+                    <dd id="transCategory"></dd>
+                    <dt>Entered By</dt>
+                    <dd id="transUser"></dd>
+                    <dt>Transaction Date</dt>
+                    <dd id="transTransacted"></dd>
+                    <dt>Entered</dt>
+                    <dd id="transEntered"></dd>
+                    <dt>Amount</dt>
+                    <dd id="transAmount"></dd>
+                    <dt>Description</dt>
+                    <dd id="transDesc"></dd>
+                    <dt>Type</dt>
+                    <dd id="transIncome">
+                    </dd>
+                    <dt> Reconciled?</dt>
+                    <dd id="transRecon"></dd>
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-teal" data-dismiss="modal">Close</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

@@ -1,0 +1,39 @@
+﻿@model Budgeter.Models.CodeFirst.Transaction
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<dl class="dl-horizontal">
+    <dt>Account</dt>
+    <dd>@Html.DisplayFor(model => model.BankAccount.Name)</dd>
+    @if (Model.BudgetItemId != null)
+    {
+        <dt>Budget</dt>
+        <dd> @Html.DisplayFor(model => model.BudgetItem.Name)</dd>
+    }
+    <dt>Category</dt>
+    <dd>@Html.DisplayFor(model => model.Category.Name)</dd>
+    <dt>Entered By</dt>
+    <dd> @Html.DisplayFor(model => model.User.FirstName)</dd>
+    <dt>Transaction Date</dt>
+    <dd> @Html.DisplayFor(model => model.Transacted.DateTime.ToShortDateString())</dd>
+    <dt>Entered</dt>
+    <dd>@Html.DisplayFor(model => model.Entered.DateTime.ToShortDateString())</dd>
+    <dt>Amount</dt>
+    <dd>$@Html.DisplayFor(model => model.Amount)</dd>
+    <dt>Description</dt>
+    <dd> @Html.DisplayFor(model => model.Description)</dd>
+    <dt> Type</dt>
+    @if (Model.Income)
+    {
+        <dd>Income</dd>}
+    else
+    {
+        <dd>Expense</dd>}
+    <dd>@Html.DisplayFor(model => model.Income)</dd>
+    <dt> Reconciled?</dt>
+    <dd>
+        @Html.DisplayFor(model => model.Reconciled)
+    </dd>
+</dl>

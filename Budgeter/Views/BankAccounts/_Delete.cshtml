@@ -1,0 +1,30 @@
+﻿@model Budgeter.Models.CodeFirst.BankAccount
+
+@{
+    ViewBag.Title = "Delete";
+}
+
+
+<h2><strong class="text-danger">Delete</strong> Bank Account</h2>
+<dl>
+    <dt>@Html.DisplayNameFor(model => model.Name):</dt>
+    <dd>@Html.DisplayFor(model => model.Name)</dd>
+    <dt>@Html.DisplayNameFor(model => model.Balance):</dt>
+    <dd>@Html.DisplayFor(model => model.Balance)</dd>
+    <dt>Includes:</dt>
+    <dd>@Model.Transactions.Count() Transactions</dd>
+</dl>
+<div class="alert alert-danger">
+    <p><strong>Warning!</strong> Are you sure you want to delete this account? All transactions and information attached to this account will be permanently deleted.</p>
+</div>
+@using (Html.BeginForm("Delete", "BankAccounts"))
+{
+    @Html.HiddenFor(model => model.Id)
+    @Html.AntiForgeryToken()
+    <div class="pull-right form-group">
+        <input type="submit" value="Delete" class="btn btn-danger" />
+        @*<a href=@Url.Action("Index", "BankAccounts") class="btn btn-teal">Cancel</a>*@
+        <button type="button" class="cancel-acct btn btn-teal">Cancel</button>
+    </div>
+}
+

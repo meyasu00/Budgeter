@@ -1,0 +1,41 @@
+﻿@model Budgeter.Models.CodeFirst.BudgetItem
+<div class="col-md-12">
+    <div class="box-info shadow">
+        <h2>Viewing Transactions for <strong>@Model.Name</strong></h2>
+        @if (Model.Transactions.Count() == 0)
+        {
+            <p>There are no transactions for this budget item yet.</p>
+        }
+        else
+        {
+            <table class="data-table compact hover table-striped">
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th>Transacted</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var transaction in Model.Transactions.OrderBy(t => t.Transacted))
+                    {
+                        <tr>
+                            <td>@transaction.BankAccount.Name</td>
+                            <td>@transaction.Transacted.DateTime.ToShortDateString()</td>
+                            @if (transaction.Income)
+                            {
+                                <td><i class="fa fa-plus"></i></td>}
+                            else
+                            {
+                                <td><i class="fa fa-minus"></i></td>}
+                            <td>@transaction.Amount</td>
+                            <td>@transaction.Description</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

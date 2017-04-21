@@ -1,0 +1,272 @@
+﻿@model Budgeter.Models.CodeFirst.Household
+@using Microsoft.AspNet.Identity;
+@{
+    ViewBag.Title = "Details";
+    var currentUserId = User.Identity.GetUserId();
+    var currentUser = Model.Users.FirstOrDefault(u => u.Id == currentUserId);
+}
+<div class="row">
+    <p class="text-danger">@ViewBag.ErrorMessage</p>
+    <div class="col-md-8">
+        <!-- USERS BOX -->
+        <div class="box-info shadow">
+            <h2><strong>Users</strong></h2>
+            <table id="tableUsers" class="data-table compact hover table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        @if (User.IsInRole("Admin"))
+                        {
+                        <th> Admin Rights ?</th>}
+                        <th>Personal Budgets</th>
+                        @if (User.IsInRole("Admin"))
+                        {
+                        <th> Actions </th>}
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.Users)
+                    {
+                        <tr>
+                            <td>@user.FirstName @user.LastName </td>
+                            <td>@user.Email</td>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                if (user.HasAdminRights)
+                                {
+                                    <td><i class="fa fa-check"></i></td>}
+                                else
+                                {
+                                    <td><i class="fa fa-times"></i></td>}
+                            }
+                            <td class="description">
+                                @if (Model.BudgetItems != null)
+                                {
+                                    foreach (var budget in Model.BudgetItems.Where(b => b.IsSoftDeleted != true))
+                                    {
+                                        if (budget.CreatorId == user.Id && budget.AllowEdits != true)
+                                        { <p>@budget.Name, @budget.Balance of @budget.AmountLimit </p><br />;
+                                        }
+                                    }
+                                }
+                            </td>
+                            <td>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    using (Html.BeginForm("ChangeAdmin", "Households", new { id = user.Id }))
+                                    {
+                                        if (User.IsInRole("SuperUser"))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            if (currentUserId != user.Id && user.HasAdminRights == true)
+                                            {<button type="submit" class="btn btn-teal btn-xs">Remove Admin</button> }
+                                            else if (currentUserId != user.Id && user.HasAdminRights != true)
+                                            {<button type="submit" class="btn btn-teal btn-xs">Make Admin</button>}
+                                        }
+                                    }
+                                    if (user.Id != currentUserId && user.IsSuperUser == false)
+                                    {<button type="button" class="expel btn btn-danger btn-xs" data-toggle="modal" data-target="#expelModal" data-id="@user.Id">Expel</button>}
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- INVITED USERS BOX -->
+        <div id="invitedUsers" class="box-info shadow">
+            <h2>
+                <strong>Invited</strong> Users
+                @if (User.IsInRole("Admin"))
+                {<button class="invite btn btn-teal btn-float pull-right">Invite New User</button>}
+            </h2>
+            <div class="clearfix"></div>
+            <div id="inviteUserPartial"></div>
+            <table id="tableIUsers" class="data-table compact hover table-striped">
+                <thead>
+                    <tr>
+                        <th>Invitee</th>
+                        <th>Email</th>
+                        <th>Admin?</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @Html.Hidden("iUser-to-delete", "", new { @id = "iUser-to-delete" })
+                    @foreach (var iUser in Model.InvitedUsers)
+                    {
+                        <tr>
+                            <td>@iUser.Name</td>
+                            <td>@iUser.Email</td>
+                            @if (iUser.HasAdminRights)
+                            {
+                                <td><i class="fa fa-check"></i></td>}
+                            else
+                            {
+                                <td><i class="fa fa-times"></i></td>}
+                            <td>
+                                <button type="button" class="delete btn btn-danger btn-xs" data-toggle="modal" data-target="#rescindModal" data-id="@iUser.Id"><i class="fa fa-trash-o"></i></button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div> <!-- /column-->
+    <!-- CATEGORIES BOX -->
+    <div class="col-md-4">
+        <div id="catsRender" class="box-info shadow">
+            <h2><strong>Categories</strong></h2>
+            @using (Html.BeginForm("Create", "Categories"))
+            {
+                @Html.AntiForgeryToken()
+                <input type="text" class="text-box form-control single-line" id="Name" name="Name" placeholder="Enter new category name" />
+                <span class="field-validation-valid text-danger" data-valmsg-for="Name" data-valmsg-replace="true"></span>
+                <button type="submit" class="btn btn-teal pull-right btn-pad">Create New</button>
+                <div class="clearfix"></div>
+            }
+            <div id="editView"></div>
+            <hr />
+            <ul class="list-unstyled categories-list">
+                @foreach (var category in Model.Categories)
+                {
+                    <li>
+                        <strong>@category.Name</strong>
+                        <div id="category-buttons" class="text-right">
+                            @if (category.Name != "Miscellaneous")
+                            {<button type="button" class="editCat btn btn-teal btn-xs" data-id="@category.Id"><i class="fa fa-edit"></i></button>
+                            <button type="button" class="deleteCat btn btn-danger btn-xs" data-id="@category.Id"><i class="fa fa-trash-o"></i></button>}
+                        </div>
+                    </li>
+
+                }
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<div class="row">
+    <button type="button" class="leave btn btn-danger" data-toggle="modal" data-target="#leaveModal" data-id="@currentUserId">Leave Household</button>
+    @if (User.IsInRole("SuperUser"))
+    {<button type="button" class="btn btn-danger" data-toggle="modal" data-target="#superModal">Assign New SuperUser</button> }
+</div>
+
+<!-- EXPEL USER MODAL-->
+<div id="expelModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"><strong>Expel</strong> User</h4>
+            </div>
+            <div class="modal-body">
+                <p class="text-danger">Are you sure you want to expel this user?</p>
+                <p>This user will lose all access to the household and must be invited back in order to rejoin.</p>
+            </div>
+            <div class="modal-footer">
+                @using (Html.BeginForm("LeaveHousehold", "Households"))
+                {@Html.AntiForgeryToken()
+                    <div class="form-group pull-right">
+                        <input id="expelId" type="hidden" name="id" value="" />
+                        <button type="submit" class="btn btn-danger">Expel User</button>
+                        <button type="button" class="btn btn-teal" data-dismiss="modal">Close</button>
+                    </div>
+                }
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- RESCIND INVITE MODAL -->
+<div id="rescindModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"><strong>Remove</strong> Invited User</h4>
+            </div>
+            <div class="modal-body">
+                <p class="text-danger">Are you sure you want to rescind your invitation?</p>
+                <p>This user will no longer be able to join the household, though you may send another invitation later. The user will not be notified that invitation has been revoked, but will be unable to sign in with the Invite Code.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-teal" data-dismiss="modal">Close</button>
+                @using (Html.BeginForm("Delete", "InvitedUsers"))
+                { @Html.AntiForgeryToken()
+                    <div class="form-group pull-right">
+                        <input id="rescindId" type="hidden" name="id" value="" />
+                        <button type="submit" id="rescindInvite" class="btn btn-danger">Remove Invitation</button>
+                    </div>}
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- LEAVE HOUSEHOLD MODAL -->
+<div id="leaveModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"><strong>Leave</strong> Household</h4>
+            </div>
+            <div class="modal-body">
+                <p class="text-danger">Are you sure you want to leave this household?</p>
+                <p>You will no longer be able to access the portal or any of the information stored within, and must be invited by a current Administrator in order to regain access.</p>
+                @if (User.IsInRole("SuperUser") && Model.Users.Count() > 1)
+                {
+                    <p><span class="text-danger">Because you are the SuperUser</span>, the entire household will be deleted if you leave. No one in the household will be able to access the portal, and all information will be lost.</p>
+                    <p>To assign a new SuperUser, choose their name from the dropdown and click "Assign New SuperUser". You will then be redirected to the Manage Household page, and can click on Leave Household again.</p>
+                    using (Html.BeginForm("ChangeSuperUser", "Households"))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="form-group login-input">
+                            @Html.DropDownList("UserId", null, "Choose New SuperUser", htmlAttributes: new { @class = "form-control" })
+                        </div>
+                            <button type="submit" class="btn btn-teal">Assign As SuperUser</button>
+                    }
+                }
+            </div>
+            <div class="modal-footer">
+
+                @using (Html.BeginForm("LeaveHousehold", "Households"))
+                {@Html.AntiForgeryToken()
+                    <div class="form-group pull-right">
+                        <input id="leaveId" type="hidden" name="id" value="" />
+                        <button type="button" class="btn btn-teal" data-dismiss="modal">Close</button>
+                        @if (!User.IsInRole("SuperUser"))
+                        {<button type="submit" class="btn btn-danger">Leave Household</button>}
+                    </div>}
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<!-- SUPER MODAL -->
+<div id="superModal" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"><strong>Assign New</strong> SuperUser</h4>
+            </div>
+            <div class="modal-body">
+                <p class="text-danger">Are you sure you want to give up SuperUser powers?</p>
+                <p>You will no longer be able to change administration status for other users, but will retain administration status yourself. The new SuperUser will be able to change your administration status or expel you if needed.</p>
+                @using (Html.BeginForm("ChangeSuperUser", "Households"))
+                {
+                    @Html.AntiForgeryToken()
+                    <div class="form-group login-input">
+                        @Html.DropDownList("UserId", null, "Choose New SuperUser", htmlAttributes: new { @class = "form-control" })
+                    </div>
+                    <button type="submit" class="btn btn-teal">Assign As SuperUser</button>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-teal" data-dismiss="modal">Close</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+

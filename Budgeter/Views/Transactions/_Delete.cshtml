@@ -1,0 +1,46 @@
+﻿@model Budgeter.Models.CodeFirst.Transaction
+
+<div class="box-info shadow">
+    <h2><strong class="text-danger">Delete</strong> Transaction</h2>
+    <dl>
+        <dt>@Html.DisplayNameFor(model => model.BankAccount.Name):</dt>
+        <dd>@Html.DisplayFor(model => model.BankAccount.Name)</dd>
+        <dt>@Html.DisplayNameFor(model => model.Income):</dt>
+        @if (Model.Income == true)
+        {
+            <dd>Income</dd>}
+        else
+        {
+            <dd>Expense</dd>}
+        <dt>@Html.DisplayNameFor(model => model.Category):</dt>
+        <dd>@Html.Raw(Model.Category.Name)</dd>
+        @if (Model.BudgetItem != null)
+        {
+            <dt>Budget Item:</dt>
+            <dd>@Html.DisplayFor(model => model.BudgetItem.Name)</dd>
+        }
+        <dt>@Html.DisplayNameFor(model => model.Transacted):</dt>
+        <dd>@Model.Transacted.DateTime.ToShortDateString()</dd>
+        <dt>@Html.DisplayNameFor(model => model.Amount)</dt>
+        <dd>$@Html.DisplayFor(model => model.Amount)</dd>
+        <dt>@Html.DisplayNameFor(model => model.Income)</dt>
+        @if (Model.Income == true)
+            {
+            <dd>Income</dd>}
+        else
+        {
+            <dd>Expense</dd>}
+    </dl>
+    <div class="alert alert-danger">
+        <p><strong>Warning!</strong> Deleting transactions is not recommended. To maintain strong records, create a reconciliation transaction instead. If you delete this transaction, all information and records involving this transaction will be permanently deleted.</p>
+    </div>
+    @using (Html.BeginForm("Delete", "Transactions"))
+    {
+        @Html.HiddenFor(model => model.Id)
+        @Html.AntiForgeryToken()
+        <div class="form-actions no-color pull-right">
+            <input type="submit" value="Delete" class="btn btn-danger btn-sm" />
+            <a href=@Url.Action("Index", "Transactions") class="btn btn-teal btn-sm" autofocus>Cancel</a>
+        </div>
+    }
+</div>

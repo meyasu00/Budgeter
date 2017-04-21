@@ -1,0 +1,22 @@
+﻿@model Budgeter.Models.CodeFirst.Category
+
+<div class="removeCat">
+    <hr />
+    <div class="alert alert-info">
+        <p><strong>FYI:</strong> When you delete this category, all transactions and budget items attached to it will be moved into the Miscellaneous category. If you instead edit the name of this category, they will be transferred to the new category.</p>
+    </div>
+    <dl class="dl-horizontal">
+        <dt>@Html.DisplayNameFor(model => model.Name)</dt>
+        <dd>@Html.DisplayFor(model => model.Name)</dd>
+    </dl>
+    @using (Html.BeginForm("Delete", "Categories"))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.Id)
+        <div class="form-actions no-color pull-right">
+            <input type="submit" value="Delete" class="btn btn-danger" />
+            <button type="button" class="cancel-cat btn btn-teal">Cancel</button>
+        </div>
+        <div class="clearfix"></div>
+    }
+</div>

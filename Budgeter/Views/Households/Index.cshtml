@@ -1,0 +1,179 @@
+﻿@model Budgeter.Models.DashboardViewModel
+
+@* DASHBOARD *@
+
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="box-info shadow">
+            <div class="col-md-12">
+                <h2>Accounts Status</h2>
+                <table class="table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Account</th>
+                            <th>Available</th>
+                            <th>Reconciled</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var account in Model.ReconBankAccounts)
+                        {
+                            <tr>
+                                <td>@account.Account.Name</td>
+                                <td class="balance">$ @account.Account.Balance</td>
+                                <td class="balance">$ @account.ReconciledBalance</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div><!-- /iteration-->
+        </div><!-- /accounts box-->
+        <div class="box-info shadow">
+            <div class="col-md-12">
+                <h2>Expense vs. Income @*<small>(@DateTime.Now.ToString("MMMM"), @DateTime.Now.Year)</small>*@</h2>
+                <div id="accountsOverviewBar" style="height: 250px;" class="col-md-12">
+                </div>
+            </div>
+        </div>
+    </div><!-- /top row-->
+
+    <div class="col-md-4">
+        <div class="box-info shadow">
+            <h2>Overview@*: @DateTime.Now.ToString("MMMM"), @DateTime.Now.Year*@</h2>
+            <h4 class="text-center">All Income</h4>
+            <div id="incomeDonut" style="height: 200px;" class="col-md-12"></div>
+            <h4 class="text-center">All Expenses</h4>
+            <div id="expenseDonut" style="height: 200px;" class="col-md-12"></div>
+
+
+            @*@foreach (var budget in Model.BudgetList)
+                {
+
+                    <div class="progress-group">
+                        <p class="progress-title pull-left">@budget.Name</p>
+                        <p class="pull-left">Current: $@budget.Balance</p>
+                        @if (budget.Income == true)
+                        {<p class="pull-right">Goal: $@budget.AmountLimit</p>}
+                        else {<p class="pull-right">Limit: $@budget.AmountLimit</p>}
+                        <div class="clearfix"></div>
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 40%">
+                                <span class="sr-only">40% Complete (success)</span>
+                            </div>
+                        </div>
+                        @{ var percentage = (budget.Balance / budget.AmountLimit);
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success" role="progressbar" aria-value="@percentage" aria-valuemin="0" aria-valuemax="100" style="width: @percentage" @*value-max="@budget.AmountLimit" value-min="0" value="@budget.Balance">
+                                <input type="hidden" id="balance" value="@budget.Balance" />
+                                <input type="hidden" id="limit" value="@budget.AmountLimit" />
+                            </div>
+                        </div>
+                            }
+                    </div>
+                }*@
+        </div>
+    </div><!-- /budgets-->
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box-info shadow">
+            <h2>Budgets Status <small>@*(@DateTime.Now.ToString("MMMM"), @DateTime.Now.Year)*@</small></h2>
+            <div id="budgetsBar" style="height: 200px;"></div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="box-info shadow">
+            <h2><strong>Unreconciled</strong> Transactions</h2>
+            <table class="data-table compact hover table-striped">
+                <thead>
+                    <tr>
+                        <th>Account</th>
+                        <th>Transacted</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                        <th>Entered By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var account in Model.ReconBankAccounts)
+                    {
+                        foreach (var transaction in account.Account.Transactions)
+                        {
+                            if (transaction.Reconciled != true)
+                            {
+                                <tr>
+                                    <td>@transaction.BankAccount.Name</td>
+                                    <td>@transaction.Transacted.DateTime.ToShortDateString()</td>
+                                    @if (transaction.Income)
+                                    {
+                                        <td><i class="fa fa-plus"></i></td>}
+                                    else
+                                    {
+                                        <td><i class="fa fa-minus"></i></td>}
+                                    <td>@transaction.Amount</td>
+                                    <td>@transaction.Description</td>
+                                    <td>@transaction.User.FirstName</td>
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+        <script type="text/javascript">
+            //$(function () {
+            //    $(".progress-bar").progressbar({
+            //        //max:$('#limit').val(),
+            //        //value: $('#balance').val()
+            //    });
+            //});
+            $.post('@Url.Action("GetCharts", "Home")').then(function (response) {
+                new Morris.Bar({
+                    element: 'accountsOverviewBar',
+                    data: response.accountsOverviewBar,
+                    resize: true,
+                    xkey: 'label',
+                    ykeys: ['income', 'expense'],
+                    labels: ['Income', 'Expense'],
+                    barColors: ['#12a114', '#d31b17'],
+                    xLabelMargin:0
+                    //xLabelAngle:-10
+                    //formatter: function (y, data) { return '$' + y }
+                })
+                new Morris.Bar({
+                    element: 'budgetsBar',
+                    data: response.budgetsBar,
+                    resize: true,
+                    xkey: 'label',
+                    ykeys: ['limit', 'balance'],
+                    labels: ['Budget Limit', 'Current Balance'],
+                    barColors: ['#12a114', '#d31b17']
+                    //formatter: function (y, data) { return '$' + y }
+                    //xLabelAngle:-35
+                })
+                new Morris.Donut({
+                    element: 'incomeDonut',
+                    data: response.incomeDonut,
+                    resize: true,
+                    colors: ['#12a114', '#17cf1a', '#30e834', '#5eed61', '#8cf28e', '#baf7bb', '#e8fce8'],
+                    formatter: function (y, data) { return '$' + y }
+                })
+                new Morris.Donut({
+                    element: 'expenseDonut',
+                    data: response.expenseDonut,
+                    resize: true,
+                    colors: ['#d31b17', '#e83430', '#ed615e', '#f28e8c', '#f7bbba', '#fce8e8'],
+                    formatter: function (y, data) { return '$' + y }
+                })
+            });
+        </script>
+    }

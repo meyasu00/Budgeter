@@ -1,0 +1,45 @@
+﻿@model Budgeter.Models.CodeFirst.BankAccount
+
+<div class="box-info shadow">
+    <h2><strong>Transactions</strong> for @Model.Name</h2>
+    @if (Model.Transactions.Count() > 0)
+    {
+        <table class="data-table compact hover table-striped">
+            <thead>
+                <tr>
+                    <th>Transacted</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Reconciled?</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var transaction in Model.Transactions.OrderBy(t => t.Transacted))
+                {
+                    <tr>
+                        <td>@transaction.Transacted.DateTime.ToShortDateString()</td>
+                        @if (transaction.Income)
+                    {
+                            <td><i class="fa fa-plus"></i></td>}
+                        else
+                        {
+                            <td><i class="fa fa-minus"></i></td>}
+                        <td>@transaction.Amount</td>
+                        <td>@transaction.Description</td>
+                        <td>@transaction.Category.Name</td>
+                        @if (transaction.Reconciled)
+                    {
+                    <td><i class="fa fa-check"></i></td>}
+                        else
+                        {
+                    <td><i class="fa fa-times"></i></td>}
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    { <p>There are no transactions for this account yet.</p>}
+</div>

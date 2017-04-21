@@ -1,0 +1,143 @@
+﻿@model Budgeter.Models.IndexViewModel
+@using Microsoft.AspNet.Identity;
+@using Budgeter.Helpers;
+@{
+    ViewBag.Title = "Manage";
+}
+
+<p class="text-success">@ViewBag.StatusMessage</p>
+<div class="row">
+    <div class="col-md-8">
+        <div class="box-info shadow">
+            <h2>Your Profile Information</h2>
+            <dl class="dl-horizontal">
+                <dt>First Name</dt>
+                <dd>@Html.DisplayFor(model => model.FirstName) </dd>
+                <dt>Last Name</dt>
+                <dd>@Html.DisplayFor(model => model.LastName)</dd>
+                <dt>@Html.DisplayNameFor(model => model.Email)</dt>
+                <dd>@Html.Raw(Model.Email)</dd>
+                <dt>@Html.DisplayNameFor(model => model.AdminRights)</dt>
+                <dd>
+                    @if (Model.AdminRights == true)
+            { <i class="fa fa-check"></i>}
+                    else
+                    { <i class="fa fa-times"></i>}
+                </dd>
+            </dl>
+        </div><!--/profile info-->
+        <div class="box-info shadow">
+            <h2>Your Budgets</h2>
+            @if (Model.BudgetItems.Count() == 0)
+            { <p>You have no current budgets.</p>}
+            else
+            {
+                foreach (var budgetItem in Model.BudgetItems)
+                {
+                    <dl>
+                        <dt>Name</dt>
+                        <dd>@budgetItem.Name</dd>
+                        <dt>Type</dt>
+                        @if (budgetItem.Income == true)
+                    {
+                            <dd><i class="fa fa-plus"></i></dd>}
+                        else
+                        {
+                            <dd><i class="fa fa-minus"></i></dd>}
+                        <dt>Category</dt>
+                        @*<dd>@Html.Raw(budgetItem.Category)</dd>*@
+                        <dd>@budgetItem.Name</dd>
+                        <dt>Goal Amount</dt>
+                        <dd>@budgetItem.AmountLimit</dd>
+                        <dt>Balance</dt>
+                        <dd>@budgetItem.Balance</dd>
+                        <dt>Editing</dt>
+                        @if (budgetItem.AllowEdits == true)
+                    {
+                            <dd>Anyone</dd>}
+                        else
+                        {
+                            <dd>Only you</dd>}
+                        <dt># of Transactions</dt>
+                        <dd>@budgetItem.Transactions.Count()</dd>
+                    </dl>
+                }
+            }
+            @Html.ActionLink("Create New Budget", "Index", "BudgetItems", null, new { @class = "btn btn-teal" })
+        </div><!--/budgets-->
+    </div>
+    <div class="col-md-4">
+        <div class="box-info shadow">
+            <h2>Edit Your Profile</h2>
+            @using (Html.BeginForm("Edit", "Manage"))
+            {
+                @Html.AntiForgeryToken();
+                @Html.HiddenFor(model => model.Email)
+                <p class="text-danger">@ViewBag.ErrorMessage</p>
+                <label>First Name</label>
+                    @Html.EditorFor(model => model.FirstName, new { htmlAttributes = new { @class = "form-control login-input" } })
+                    <br />
+                    <label>Last Name</label>
+                    @Html.EditorFor(model => model.LastName, new { htmlAttributes = new { @class = "form-control login-input" } })
+                    <br />
+                    <button type="submit" class="btn btn-teal pull-right" formmethod="post" formaction="Edit">Save Changes</button>
+                    <div class="clearfix"></div>
+            }
+            <hr />
+            <div id="manage">
+                @if (Convert.ToInt32(User.Identity.GetHouseholdId()) == 13)
+                { <button type="button" class="btn btn-dark text-center" disabled>Change Password</button>}
+                else
+                {
+                    <a href=@Url.Action("ChangePassword") class="btn btn-dark text-center">Change Password</a>}
+                <br />
+                <a href=@Url.Action("Manage", "ManageLogins") class="btn btn-dark text-center">Manage (@Model.Logins.Count) External Logins</a>
+            </div>
+            <hr />
+
+            @*@if (Model.HasPassword)
+                {
+                            @Html.ActionLink("Change your password", "ChangePassword")
+                        }
+                        else
+                        {
+                            @Html.ActionLink("Create", "SetPassword")
+                        }
+                        ]
+                    </dd>
+                    <dt>External Logins:</dt>
+                    <dd>
+                        @Model.Logins.Count [
+                        @Html.ActionLink("Manage", "ManageLogins") ]*@
+            <dl>
+                <dt>Two-Factor Authentication:</dt>
+                <dd>
+                    <p>
+                        There are no two-factor authentication providers configured. @*See <a href="http://go.microsoft.com/fwlink/?LinkId=403804">this article</a>
+                            for details on setting up this ASP.NET application to support two-factor authentication.*@
+                    </p>
+                    @*@if (Model.TwoFactor)
+                        {
+                            using (Html.BeginForm("DisableTwoFactorAuthentication", "Manage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <text>Enabled
+                                <input type="submit" value="Disable" class="btn btn-link" />
+                                </text>
+                            }
+                        }
+                        else
+                        {
+                            using (Html.BeginForm("EnableTwoFactorAuthentication", "Manage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <text>Disabled
+                                <input type="submit" value="Enable" class="btn btn-link" />
+                                </text>
+                            }
+                        }*@
+                </dd>
+            </dl>
+        </div><!--/edit-->
+    </div>
+</div>

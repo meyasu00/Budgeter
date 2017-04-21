@@ -1,0 +1,37 @@
+﻿@model Budgeter.Models.CodeFirst.Household
+@{
+    Layout = "~/Views/Shared/_BudgeterLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-3 full-content-xsmall animated fadeInDownBig">
+        <div class="login-wrap">
+            <a href=@Url.Action("Login", "Account") class="btn btn-teal btn-block"><i class="fa fa-unlock"></i> Login</a>
+            <a href=@Url.Action("Register", "Account") class="btn btn-teal btn-block"><i class="fa fa-rocket fa-inverse"></i> Register</a>
+        </div>
+        <div class="login-wrap">
+            @using (Html.BeginForm("LoginGuest", "Account"))
+            {
+                @Html.AntiForgeryToken()
+                @*<button type="submit" class="btn btn-dark btn-block">Demo as Guest</button>*@
+            }
+            @using (Html.BeginForm("LoginGuestSuperUser", "Account"))
+            {
+                @Html.AntiForgeryToken()
+                @*<button type="submit" class="btn btn-dark btn-block">Demo as Guest SuperUser</button>*@
+            }
+        </div>
+    </div>
+    <div class="col-md-3 full-content-xsmall animated fadeInDownBig">
+        <div class="login-wrap">
+            @*<a class="section-scroll btn btn-teal btn-block btn-lg" href="#about">Learn More</a>*@
+
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div id="title" class="col-md-4">
+        <h4 class="pull-left" style="color:#09c3c3">Welcome to</h4>
+        <h1 class="app-title text-right">Budget' er</h1>
+    </div>
+</div>
